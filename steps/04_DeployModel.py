@@ -34,7 +34,7 @@ def main():
 
     environment = os.environ.get("AML_ENV_NAME")
 
-    config_state_folder = os.path.join(os.environ.get("ROOT_DIR"), 'config_states')
+    temp_state_directory = os.environ.get("TEMP_STATE_DIRECTORY")
     score_script_path = os.path.join(os.environ.get("ROOT_DIR"), 'scripts', 'score.py')
 
     ws = Workspace.get(
@@ -44,7 +44,7 @@ def main():
         auth=cli_auth
     )
 
-    config = getConfiguration(config_state_folder + "/model_details.json")
+    config = getConfiguration(temp_state_directory + "/model_details.json")
 
     model = Model.deserialize(workspace=ws, model_payload=config['model'])
     
@@ -57,15 +57,15 @@ def main():
     env.register(workspace = ws)
     inference_config = InferenceConfig(entry_script=score_script_path, environment=env)
 
-
+    # Azure Container Instance 
     aciconfig = AciWebservice.deploy_configuration(
         cpu_cores=1, 
         memory_gb=1, 
-        tags={"data": "tveer",  "method" : "keras"}, 
-        description='Classify images with tveer'
+        tags={"data": "mnist",  "method" : "keras"}, 
+        description='Classify handwritten digits'
     )
 
-    service_name = 'tveerdetection-svc-' + str(uuid.uuid4())[:4]
+    service_name = 'mnist-digits-svc-' + str(uuid.uuid4())[:4]
     service = Model.deploy(workspace=ws, 
                         name=service_name, 
                         models=[model], 
@@ -74,7 +74,7 @@ def main():
 
     service.wait_for_deployment(show_output=True)
 
-    with open(config_state_folder + "/service_details.json", "w") as service_details:
+    with open(temp_state_directory + "/service_details.json", "w") as service_details:
         json.dump(service.serialize(), service_details)
     
 

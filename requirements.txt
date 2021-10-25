@@ -4,3 +4,4 @@ matplotlib
 python-dotenv
 azureml-sdk
 azure-cli
+azureml.opendatasets

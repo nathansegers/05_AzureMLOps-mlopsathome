@@ -35,8 +35,7 @@ def main():
     model_name = os.environ.get("MODEL_NAME")
     model_description = os.environ.get("MODEL_DESCRIPTION")
     experiment_name = os.environ.get("EXPERIMENT_NAME")
-    config_state_folder = os.path.join(os.environ.get("ROOT_DIR"), 'config_states')
-
+    temp_state_directory = os.environ.get("TEMP_STATE_DIRECTORY")
     ws = Workspace.get(
         name=workspace_name,
         subscription_id=subscription_id,
@@ -44,9 +43,10 @@ def main():
         auth=cli_auth
     )
 
-    config = getConfiguration(config_state_folder + "/training-run.json")
+    config = getConfiguration(temp_state_directory + "/training_run.json")
     exp = Experiment(workspace=ws, name=experiment_name)
     run = Run(experiment=exp, run_id=config['runId'])
+
     model = registerModel(model_name, model_description, run)
 
     model_json = {}
@@ -55,7 +55,7 @@ def main():
 
     print(model_json)
 
-    with open(config_state_folder + "/model_details.json", "w") as model_details:
+    with open(temp_state_directory + "/model_details.json", "w") as model_details:
         json.dump(model_json, model_details)
 
 if __name__ == '__main__':

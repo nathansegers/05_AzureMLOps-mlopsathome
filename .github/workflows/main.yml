@@ -18,7 +18,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -28,7 +28,7 @@ jobs:
       - name: 'Set up python'
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
+          python-version: 3.8
       
       - name: "install requirements"
         run: |
@@ -64,5 +64,5 @@ jobs:
         uses: actions/upload-artifact@v2.2.3
         with:
           name: config-data
-          path: steps/root/config_states
+          path: tmp
           retention-days: 10

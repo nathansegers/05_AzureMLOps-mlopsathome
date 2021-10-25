@@ -47,9 +47,13 @@ def prepareMachines(ws):
         compute_target.wait_for_completion(show_output=True, min_node_count=None, timeout_in_minutes=20)
     return compute_target
 
-def prepareTraining(dataset, model_name, script_folder, compute_target, env):
-    args = ['--data-folder', dataset.as_mount(), '--epochs', 30, '--batch_size', 32, '--model_name', model_name]
-    src = ScriptRunConfig(source_directory=script_folder, script='train.py', arguments=args, compute_target=compute_target, environment=env)
+def prepareTraining(dataset, script_folder, compute_target, env):
+
+    reg_parameter = float(os.environ.get("REG_PARAMETER"))
+    train_script_name = os.environ.get("TRAIN_SCRIPT_NAME")
+
+    args = ['--data-folder', dataset.as_mount(), '--regularization', reg_parameter]
+    src = ScriptRunConfig(source_directory=script_folder, script=train_script_name, arguments=args, compute_target=compute_target, environment=env)
 
     return src
 
@@ -64,10 +68,9 @@ def main():
     env_name = os.environ.get("AML_ENV_NAME")
     model_name = os.environ.get("MODEL_NAME")
 
-    dataset_name = os.environ.get("TRAINING_TESTING_DATASET")
+    dataset_name = os.environ.get("DATASET_NAME")
 
     script_folder = os.path.join(os.environ.get('ROOT_DIR'), 'scripts')
-    config_state_folder = os.path.join(os.environ.get('ROOT_DIR'), 'config_states')
 
     ws = Workspace.get(
         name=workspace_name,
@@ -82,7 +85,7 @@ def main():
     
     compute_target = prepareMachines(ws)
     env = prepareEnv(ws, env_name)
-    src = prepareTraining(dataset, model_name, script_folder, compute_target, env)
+    src = prepareTraining(dataset, script_folder, compute_target, env)
 
     ## Start training
     exp = Experiment(workspace=ws, name=experiment_name)
@@ -92,7 +95,9 @@ def main():
 
     run_details = {k:v for k,v in run.get_details().items() if k not in ['inputDatasets', 'outputDatasets']}
     
-    with open(config_state_folder + '/training-run.json', 'w') as training_run_json:
+    temp_state_directory = os.environ.get("TEMP_STATE_DIRECTORY")
+    
+    with open(os.path.join(temp_state_directory, 'training_run.json'), 'w') as training_run_json:
         json.dump(run_details, training_run_json)
     
 
