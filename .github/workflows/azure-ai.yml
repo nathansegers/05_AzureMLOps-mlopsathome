@@ -36,7 +36,7 @@ jobs:
     outputs:
       data_prep: 'false'
       ai_training: 'true'
-      api_creation: 'true'
+      api_creation: 'false'
 
     steps:
       - run: echo 'all outputs have been set'
