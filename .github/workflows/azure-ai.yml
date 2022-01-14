@@ -43,6 +43,7 @@ jobs:
           echo "::set-output name=run::{{ env.data_prep }}"
 
   data-preparing:
+    needs: [check-which-jobs-to-run]
     if: ${{ needs.check-which-jobs-to-run.outputs.data_prep == 'true' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
