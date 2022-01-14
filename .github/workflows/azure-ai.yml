@@ -15,7 +15,7 @@ env:
   # TENANT_ID: ${{ secrets.TENANT_ID }}
   # CLIENT_ID: ${{ secrets.CLIENT_ID }}
   # CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-  data_prep: true
+  data_prep: false
   ai_training: true
   api_creation: true
 
@@ -44,13 +44,13 @@ jobs:
           echo "The variable is ${{ env.data_prep }}"
           echo "::set-output name=run::${{ env.data_prep }}"
 
-      - name: 'Check to run data pipeline'
+      - name: 'Check to run ai training pipeline'
         id: ai_training
         run: |
           echo "The variable is ${{ env.ai_training }}"
           echo "::set-output name=run::${{ env.ai_training }}"
 
-      - name: 'Check to run data pipeline'
+      - name: 'Check to run api creation pipeline'
         id: api_creation
         run: |
           echo "The variable is ${{ env.api_creation }}"
