@@ -42,7 +42,7 @@ jobs:
       - run: echo 'all outputs have been set'
 
   data-preparing:
-    needs: [dependencies]
+    needs: [dependencies] # Wait until this job was finished.
     if: ${{ needs.dependencies.outputs.data_prep == 'true' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
@@ -83,7 +83,7 @@ jobs:
 
   ai-training:
     needs: [dependencies, data-preparing]
-    # Allow this job to start if the previous one succeeded. Or if the ai_training part is set to true specifically.
+    # This will run Always BUT only when the previous job was successful or skipped && the ai_Training flag is set to true.
     if: ${{
         always() &&
         (needs.data-preparing.result == 'success' || needs.data-preparing.result == 'skipped') &&
@@ -113,10 +113,11 @@ jobs:
 
 
   api-creation-and-CI:
-    needs: [dependencies, ai-training]
-    # Allow this job to start if the previous one succeeded. Or if the api_creation part is set to true specifically.
+    needs: [dependencies, data-preparing, ai-training]
+    # This will run Always BUT only when the previous two jobs were successful or skipped && the api_creation flag is set to true.
     if: ${{
         always() &&
+        (needs.data-preparing.result == 'success' || needs.data-preparing.result == 'skipped') &&
         (needs.ai-training.result == 'success' || needs.ai-training.result == 'skipped') &&
         needs.dependencies.outputs.api_creation == 'true'
       }}
