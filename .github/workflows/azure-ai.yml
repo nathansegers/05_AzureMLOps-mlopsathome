@@ -42,7 +42,8 @@ jobs:
     #   ai_training: ${{ steps.ai_training.outputs.run }}
     #   api_creation: ${{ steps.api_creation.outputs.run }}
 
-    # steps:
+    steps:
+      - run: echo 'all outputs have been set' 
     #   - id: data_prep
     #     run: echo "::set-output name=run::${{ env.data_prep }}"
 
@@ -54,7 +55,7 @@ jobs:
 
   data-preparing:
     needs: [check-which-jobs-to-run]
-    if: ${{ needs.check-which-jobs-to-run.outputs.data_prep == 'true' }}
+    if: ${{ $data_prep == 'true' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
