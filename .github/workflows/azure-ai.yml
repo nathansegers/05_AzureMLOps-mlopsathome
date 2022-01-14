@@ -41,20 +41,20 @@ jobs:
       - name: 'Check to run data pipeline'
         id: data_prep
         run: |
-          echo "The variable is {{ env.data_prep }}"
-          echo "::set-output name=run::{{ env.data_prep }}"
+          echo "The variable is ${{ env.data_prep }}"
+          echo "::set-output name=run::${{ env.data_prep }}"
 
       - name: 'Check to run data pipeline'
         id: ai_training
         run: |
-          echo "The variable is {{ env.ai_training }}"
-          echo "::set-output name=run::{{ env.ai_training }}"
+          echo "The variable is ${{ env.ai_training }}"
+          echo "::set-output name=run::${{ env.ai_training }}"
 
       - name: 'Check to run data pipeline'
         id: api_creation
         run: |
-          echo "The variable is {{ env.api_creation }}"
-          echo "::set-output name=run::{{ env.api_creation }}"
+          echo "The variable is ${{ env.api_creation }}"
+          echo "::set-output name=run::${{ env.api_creation }}"
 
   data-preparing:
     needs: [check-which-jobs-to-run]
