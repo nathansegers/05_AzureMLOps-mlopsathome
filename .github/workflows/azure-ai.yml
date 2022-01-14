@@ -39,7 +39,7 @@ jobs:
       api_creation: 'true'
 
     steps:
-      - run: echo 'all outputs have been set' 
+      - run: echo 'all outputs have been set'
 
   data-preparing:
     needs: [dependencies]
@@ -84,12 +84,15 @@ jobs:
   ai-training:
     needs: [dependencies, data-preparing]
     # Allow this job to start if the previous one succeeded. Or if the ai_training part is set to true specifically.
-    if: ${{ success() && needs.dependencies.outputs.ai_training == 'true' }}
+    if: ${{
+        always() &&
+        (needs.data-preparing.result == 'success' || needs.data-preparing.result == 'skipped') &&
+        needs.dependencies.outputs.ai_training == 'true'
+      }}
     runs-on: ubuntu-latest
 
     env:
       BATCH_SIZE: 64
-      SEQ_LENGTH: 60
       EPOCHS: 100
       VALIDATION_SPLIT: 0.2
       TRAIN_SCRIPT_NAME: train.py
@@ -112,7 +115,11 @@ jobs:
   api-creation-and-CI:
     needs: [dependencies, ai-training]
     # Allow this job to start if the previous one succeeded. Or if the api_creation part is set to true specifically.
-    if: ${{ success() && needs.dependencies.outputs.api_creation == 'true' }}
+    if: ${{
+        always() &&
+        (needs.ai-training.result == 'success' || needs.ai-training.result == 'skipped') &&
+        needs.dependencies.outputs.ai_training == 'true'
+      }}
     runs-on: ubuntu-latest
 
     env:
