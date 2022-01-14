@@ -6,9 +6,10 @@ name: MLOps Azure Data Preparing and AI Training
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [ main, lessonsteps/** ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, lessonsteps/** ]
+    
 
 env:
   # TENANT_ID: ${{ secrets.TENANT_ID }}
