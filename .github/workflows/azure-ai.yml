@@ -10,9 +10,6 @@ on:
   pull_request:
     branches: [ main ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
 env:
   # TENANT_ID: ${{ secrets.TENANT_ID }}
   # CLIENT_ID: ${{ secrets.CLIENT_ID }}
@@ -120,7 +117,7 @@ jobs:
       - name: 'Docker creation'
         run: |
           echo "Creating Docker image"
-          
+
 
 
 
