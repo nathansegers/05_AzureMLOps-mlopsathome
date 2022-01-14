@@ -85,7 +85,7 @@ jobs:
   ai-training:
     needs: [dependencies, data-preparing]
     # Allow this job to start if the previous one succeeded and the automatically_proceed flag is set to 'true'. Or if the ai_training part is set to true specifically.
-    if: ${{ needs.dependencies.outputs.automatically_proceed == 'true' && success() || needs.dependencies.outputs.ai_training == 'true' }}
+    if: ${{ (needs.dependencies.outputs.automatically_proceed == 'true' && success()) || needs.dependencies.outputs.ai_training == 'true' }}
     runs-on: ubuntu-latest
 
     env:
@@ -113,7 +113,7 @@ jobs:
   api-creation-and-deployment:
     needs: [dependencies, ai-training]
     # Allow this job to start if the previous one succeeded and the automatically_proceed flag is set to 'true'. Or if the api_creation part is set to true specifically.
-    if: ${{ needs.dependencies.outputs.automatically_proceed == 'true' && success() || needs.dependencies.outputs.api_creation == 'true' }}
+    if: ${{ (needs.dependencies.outputs.automatically_proceed == 'true' && success()) || needs.dependencies.outputs.api_creation == 'true' }}
     runs-on: ubuntu-latest
 
     env:
