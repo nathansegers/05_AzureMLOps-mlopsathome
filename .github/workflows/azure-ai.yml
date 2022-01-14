@@ -15,9 +15,9 @@ env:
   # TENANT_ID: ${{ secrets.TENANT_ID }}
   # CLIENT_ID: ${{ secrets.CLIENT_ID }}
   # CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-  data_prep: false
-  ai_training: true
-  api_creation: false
+  # data_prep: false
+  # ai_training: true
+  # api_creation: false
 
   WORKSPACE_NAME: segersnathan # Change this !
   RESOURCE_GROUP: NathanReserve # Change this !
@@ -29,23 +29,28 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
+  # This job is just to set redirect some environment values as output values.
   check-which-jobs-to-run:
     runs-on: ubuntu-20.04
 
     outputs:
-      data_prep: ${{ steps.data_prep.outputs.run }}
-      ai_training: ${{ steps.ai_training.outputs.run }}
-      api_creation: ${{ steps.api_creation.outputs.run }}
+      data_prep: 'false'
+      ai_training: 'true'
+      api_creation: 'false'
+      automatically_proceed: 'true'
+    #   data_prep: ${{ steps.data_prep.outputs.run }}
+    #   ai_training: ${{ steps.ai_training.outputs.run }}
+    #   api_creation: ${{ steps.api_creation.outputs.run }}
 
-    steps:
-      - id: data_prep
-        run: echo "::set-output name=run::${{ env.data_prep }}"
+    # steps:
+    #   - id: data_prep
+    #     run: echo "::set-output name=run::${{ env.data_prep }}"
 
-      - id: ai_training
-        run: echo "::set-output name=run::${{ env.ai_training }}"
+    #   - id: ai_training
+    #     run: echo "::set-output name=run::${{ env.ai_training }}"
 
-      - id: api_creation
-        run: echo "::set-output name=run::${{ env.api_creation }}"
+    #   - id: api_creation
+    #     run: echo "::set-output name=run::${{ env.api_creation }}"
 
   data-preparing:
     needs: [check-which-jobs-to-run]
