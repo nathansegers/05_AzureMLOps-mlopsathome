@@ -35,8 +35,8 @@ jobs:
 
     outputs:
       data_prep: 'false'
-      ai_training: 'true'
-      api_creation: 'false'
+      ai_training: 'false'
+      api_creation: 'true'
 
     steps:
       - run: echo 'all outputs have been set'
@@ -118,7 +118,7 @@ jobs:
     if: ${{
         always() &&
         (needs.ai-training.result == 'success' || needs.ai-training.result == 'skipped') &&
-        needs.dependencies.outputs.ai_training == 'true'
+        needs.dependencies.outputs.api_creation == 'true'
       }}
     runs-on: ubuntu-latest
 
