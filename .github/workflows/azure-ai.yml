@@ -1,0 +1,127 @@
+# This is a basic workflow to help you get started with Actions
+
+name: MLOps Azure Data Preparing and AI Training
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  # TENANT_ID: ${{ secrets.TENANT_ID }}
+  # CLIENT_ID: ${{ secrets.CLIENT_ID }}
+  # CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  data_prep: true
+  ai_training: true
+  api_creation: true
+
+  WORKSPACE_NAME: segersnathan # Change this !
+  RESOURCE_GROUP: NathanReserve # Change this !
+  SUBSCRIPTION_ID: 7c50f9c3-289b-4ae0-a075-08784b3b9042 # Change this !
+
+  TEMP_STATE_DIRECTORY: tmp
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  data-preparing:
+    if: ${{ env.data_prep }}
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    env:
+      DATA_FOLDER: data
+      DATASET_NEW_VERSION: true
+      DATASET_DESCRIPTION: Animals and their images
+      DATASET_BASE_NAME: animals
+      ANIMALS: cats, dogs, pandas
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # - name: 'Set up python'
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: 3.8
+      #     cache: 'pip'
+      
+      # - name: 'install requirements'
+      #   run: pip install -r requirements.txt
+          
+      # - name: 'Run data prep script'
+      #   id: dataprep
+      #   working-directory: AI-Pipeline
+      #   run: |
+      #     python 01_DataPreparing.py
+      
+      # - name: 'Save config data'
+      #   uses: actions/upload-artifact@v2.2.3
+      #   with:
+      #     name: config-data
+      #     path: {{ env.TEMP_STATE_DIRECTORY }}
+      #     retention-days: 10
+
+  ai-training:
+    needs: data-preparing
+    if: ${{ env.ai_training || success() }} # If we have specifically stated to run the ai_training, it should do this, or else this should run when the previous pipeline was successful
+    runs-on: ubuntu-latest
+
+    env:
+      BATCH_SIZE: 64
+      SEQ_LENGTH: 60
+      EPOCHS: 100
+      VALIDATION_SPLIT: 0.2
+      TRAIN_SCRIPT_NAME: train.py
+      ROOT_DIR: root
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # - name: 'Set up python'
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: 3.8
+      #     cache: 'pip'
+
+      # - name: "install requirements"
+      #   run: pip install -r requirements.txt
+
+
+  api-creation-and-deployment:
+    needs: ai-training
+    if: ${{ env.api_creation || success() }}
+    runs-on: ubuntu-latest
+
+    env:
+      MODEL_DIRECTORY: api/models
+      MODEL_NAME: animals-cnn
+      MODEL_VERSION: latest # change to a specific version if you need to
+
+      DOCKER_TAG: latest
+      DOCKER_REPOSITORY: ghcr.io/nathansegers/05-azuremlops
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 'Download AI model'
+        run: |
+          echo "Downloading AI model to model directory"
+
+      - name: 'Docker creation'
+        run: |
+          echo "Creating Docker image"
+          
+
+
+
+
