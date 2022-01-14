@@ -17,7 +17,7 @@ env:
   # CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
   data_prep: false
   ai_training: true
-  api_creation: true
+  api_creation: false
 
   WORKSPACE_NAME: segersnathan # Change this !
   RESOURCE_GROUP: NathanReserve # Change this !
@@ -38,23 +38,14 @@ jobs:
       api_creation: ${{ steps.api_creation.outputs.run }}
 
     steps:
-      - name: 'Check to run data pipeline'
-        id: data_prep
-        run: |
-          echo "The variable is ${{ env.data_prep }}"
-          echo "::set-output name=run::${{ env.data_prep }}"
+      - id: data_prep
+        run: echo "::set-output name=run::${{ env.data_prep }}"
 
-      - name: 'Check to run ai training pipeline'
-        id: ai_training
-        run: |
-          echo "The variable is ${{ env.ai_training }}"
-          echo "::set-output name=run::${{ env.ai_training }}"
+      - id: ai_training
+        run: echo "::set-output name=run::${{ env.ai_training }}"
 
-      - name: 'Check to run api creation pipeline'
-        id: api_creation
-        run: |
-          echo "The variable is ${{ env.api_creation }}"
-          echo "::set-output name=run::${{ env.api_creation }}"
+      - id: api_creation
+        run: echo "::set-output name=run::${{ env.api_creation }}"
 
   data-preparing:
     needs: [check-which-jobs-to-run]
