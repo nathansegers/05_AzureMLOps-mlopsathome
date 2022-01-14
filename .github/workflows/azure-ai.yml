@@ -36,8 +36,7 @@ jobs:
     outputs:
       data_prep: 'false'
       ai_training: 'true'
-      api_creation: 'false'
-      automatically_proceed: 'true'
+      api_creation: 'true'
 
     steps:
       - run: echo 'all outputs have been set' 
@@ -84,8 +83,8 @@ jobs:
 
   ai-training:
     needs: [dependencies, data-preparing]
-    # Allow this job to start if the previous one succeeded and the automatically_proceed flag is set to 'true'. Or if the ai_training part is set to true specifically.
-    if: ${{ (needs.dependencies.outputs.automatically_proceed == 'true' && success()) || needs.dependencies.outputs.ai_training == 'true' }}
+    # Allow this job to start if the previous one succeeded. Or if the ai_training part is set to true specifically.
+    if: ${{ success() && needs.dependencies.outputs.ai_training == 'true' }}
     runs-on: ubuntu-latest
 
     env:
@@ -110,10 +109,10 @@ jobs:
       #   run: pip install -r requirements.txt
 
 
-  api-creation-and-deployment:
+  api-creation-and-CI:
     needs: [dependencies, ai-training]
-    # Allow this job to start if the previous one succeeded and the automatically_proceed flag is set to 'true'. Or if the api_creation part is set to true specifically.
-    if: ${{ (needs.dependencies.outputs.automatically_proceed == 'true' && success()) || needs.dependencies.outputs.api_creation == 'true' }}
+    # Allow this job to start if the previous one succeeded. Or if the api_creation part is set to true specifically.
+    if: ${{ success() && needs.dependencies.outputs.api_creation == 'true' }}
     runs-on: ubuntu-latest
 
     env:
