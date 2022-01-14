@@ -33,7 +33,9 @@ jobs:
     runs-on: ubuntu-20.04
 
     outputs:
-      data_prep: ${{ steps.check.outputs.run }}
+      data_prep: ${{ steps.data_prep.outputs.run }}
+      ai_training: ${{ steps.ai_training.outputs.run }}
+      api_creation: ${{ steps.api_creation.outputs.run }}
 
     steps:
       - name: 'Check to run data pipeline'
@@ -41,6 +43,18 @@ jobs:
         run: |
           echo "The variable is {{ env.data_prep }}"
           echo "::set-output name=run::{{ env.data_prep }}"
+
+      - name: 'Check to run data pipeline'
+        id: ai_training
+        run: |
+          echo "The variable is {{ env.ai_training }}"
+          echo "::set-output name=run::{{ env.ai_training }}"
+
+      - name: 'Check to run data pipeline'
+        id: api_creation
+        run: |
+          echo "The variable is {{ env.api_creation }}"
+          echo "::set-output name=run::{{ env.api_creation }}"
 
   data-preparing:
     needs: [check-which-jobs-to-run]
@@ -84,7 +98,7 @@ jobs:
 
   ai-training:
     needs: data-preparing
-    if: ${{ ai_training == true || success() }} # If we have specifically stated to run the ai_training, it should do this, or else this should run when the previous pipeline was successful
+    if: ${{ needs.check-which-jobs-to-run.outputs.ai_training == 'true' || success() }} # If we have specifically stated to run the ai_training, it should do this, or else this should run when the previous pipeline was successful
     runs-on: ubuntu-latest
 
     env:
@@ -111,7 +125,7 @@ jobs:
 
   api-creation-and-deployment:
     needs: ai-training
-    if: ${{ api_creation == true || success() }}
+    if: ${{ needs.check-which-jobs-to-run.outputs.api_creation == 'true' || success() }}
     runs-on: ubuntu-latest
 
     env:
