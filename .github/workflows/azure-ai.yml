@@ -30,7 +30,7 @@ env:
 jobs:
 
   # This job is just to set redirect some environment values as output values.
-  check-which-jobs-to-run:
+  dependencies:
     runs-on: ubuntu-20.04
 
     outputs:
@@ -38,24 +38,13 @@ jobs:
       ai_training: 'true'
       api_creation: 'false'
       automatically_proceed: 'true'
-    #   data_prep: ${{ steps.data_prep.outputs.run }}
-    #   ai_training: ${{ steps.ai_training.outputs.run }}
-    #   api_creation: ${{ steps.api_creation.outputs.run }}
 
     steps:
       - run: echo 'all outputs have been set' 
-    #   - id: data_prep
-    #     run: echo "::set-output name=run::${{ env.data_prep }}"
-
-    #   - id: ai_training
-    #     run: echo "::set-output name=run::${{ env.ai_training }}"
-
-    #   - id: api_creation
-    #     run: echo "::set-output name=run::${{ env.api_creation }}"
 
   data-preparing:
-    needs: [check-which-jobs-to-run]
-    if: ${{ needs.check-which-jobs-to-run.outputs.data_prep == 'true' }}
+    needs: [dependencies]
+    if: ${{ needs.dependencies.outputs.data_prep == 'true' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
@@ -94,8 +83,9 @@ jobs:
       #     retention-days: 10
 
   ai-training:
-    needs: data-preparing
-    if: ${{ needs.check-which-jobs-to-run.outputs.ai_training == 'true' || success() }} # If we have specifically stated to run the ai_training, it should do this, or else this should run when the previous pipeline was successful
+    needs: [dependencies, data-preparing]
+    # Allow this job to start if the previous one succeeded and the automatically_proceed flag is set to 'true'. Or if the ai_training part is set to true specifically.
+    if: ${{ needs.dependencies.outputs.automatically_proceed == 'true' && success() || needs.dependencies.outputs.ai_training == 'true' }}
     runs-on: ubuntu-latest
 
     env:
@@ -121,8 +111,9 @@ jobs:
 
 
   api-creation-and-deployment:
-    needs: ai-training
-    if: ${{ needs.check-which-jobs-to-run.outputs.api_creation == 'true' || success() }}
+    needs: [dependencies, ai-training]
+    # Allow this job to start if the previous one succeeded and the automatically_proceed flag is set to 'true'. Or if the api_creation part is set to true specifically.
+    if: ${{ needs.dependencies.outputs.automatically_proceed == 'true' && success() || needs.dependencies.outputs.api_creation == 'true' }}
     runs-on: ubuntu-latest
 
     env:
