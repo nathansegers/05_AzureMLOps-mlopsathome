@@ -30,7 +30,7 @@ env:
 jobs:
 
   data-preparing:
-    if: ${{ env.data_prep }}
+    if: ${{ env.data_prep == true }}
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
@@ -70,7 +70,7 @@ jobs:
 
   ai-training:
     needs: data-preparing
-    if: ${{ env.ai_training || success() }} # If we have specifically stated to run the ai_training, it should do this, or else this should run when the previous pipeline was successful
+    if: ${{ env.ai_training == true || success() }} # If we have specifically stated to run the ai_training, it should do this, or else this should run when the previous pipeline was successful
     runs-on: ubuntu-latest
 
     env:
@@ -97,7 +97,7 @@ jobs:
 
   api-creation-and-deployment:
     needs: ai-training
-    if: ${{ env.api_creation || success() }}
+    if: ${{ env.api_creation == true || success() }}
     runs-on: ubuntu-latest
 
     env:
