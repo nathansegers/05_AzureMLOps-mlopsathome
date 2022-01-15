@@ -1,3 +1,10 @@
 tmp/**
 
 .env
+.config
+.devcontainer
+data
+
+Notes.txt
+
+**/__pycache__
