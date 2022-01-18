@@ -14,14 +14,17 @@ on:
     inputs:
       data_prep:
         description: 'Data preparing'
+        type: boolean
         required: true
         default: "true"
       ai_training:
         description: 'AI Training'
+        type: boolean
         required: true
         default: "true"
       api_creation:
         description: 'API Creation'
+        type: boolean
         required: true
         default: "true"
     
