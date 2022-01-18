@@ -26,7 +26,7 @@ TRAIN_TEST_SPLIT_FACTOR = float(os.environ.get('TRAIN_TEST_SPLIT_FACTOR'))
 
 def processAndUploadAnimalImages(datasets, data_path, processed_path, ws, animal_name):
 
-    # We can't use mount on these machines, so we'll have to download thme
+    # We can't use mount on these machines, so we'll have to download them
 
     animal_path = os.path.join(data_path, 'animals', animal_name)
 
