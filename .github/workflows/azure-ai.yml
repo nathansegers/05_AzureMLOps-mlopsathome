@@ -86,7 +86,7 @@ jobs:
       - name: 'Run data prep script'
         id: dataprep
         run: |
-          python 01_DataPreparing.py
+          python steps/01_DataPreparing.py
 
   ai-training:
     needs: [data-preparing]
@@ -135,7 +135,7 @@ jobs:
       - name: 'Run data prep script'
         id: aitraining
         run: |
-          python 02_AITraining.py
+          python steps/02_AITraining.py
 
 
   api-creation-and-CI:
