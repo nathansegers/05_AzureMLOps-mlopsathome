@@ -16,18 +16,38 @@ on:
       data_prep:
         description: 'Data preparing'
         type: boolean
-        required: false
+        required: true
         default: "true"
       ai_training:
         description: 'AI Training'
         type: boolean
-        required: false
+        required: true
         default: "true"
       api_creation:
         description: 'API Creation'
         type: boolean
-        required: false
+        required: true
         default: "true"
+      data_prep_skip_process:
+        description: 'Check to skip the processing of the original Data images'
+        type: boolean
+        required: true
+        default: "false"
+      data_prep_skip_split:
+        description: 'Check to skip the Splitting of the Training and Testiing sets'
+        type: boolean
+        required: true
+        default: "false"
+      train_on_local:
+        description: 'Should we train the AI model on the runner? Otherwise we train on Azure cloud machine'
+        type: boolean
+        required: true
+        default: "false"
+      kubernetes_deployment:
+        description: 'Check if we should deploy the API on Kubernetes instead of Azure.'
+        type: boolean
+        required: true
+        default: "false"
     
 
 env:
@@ -70,8 +90,8 @@ jobs:
       DATA_FOLDER: data
       DATASET_VERSION: true
       TRAIN_TEST_SPLIT_FACTOR: 0.20
-      PROCESS_IMAGES: true # Make the pipeline skip processing the images
-      SPLIT_IMAGES: true # Make the pipeline skip splitting the images
+      PROCESS_IMAGES: ${{ github.event.inputs.data_prep_skip_process }} # Make the pipeline skip processing the images
+      SPLIT_IMAGES: ${{ github.event.inputs.data_prep_skip_split }} # Make the pipeline skip splitting the images
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -117,7 +137,7 @@ jobs:
       AML_COMPUTE_CLISTER_MAX_NODES: 4
       AML_COMPUTE_CLUSTER_SKU: STANDARD_D2_V2
 
-      TRAIN_ON_LOCAL: False # If you want to train on your local runner, set this to True.
+      TRAIN_ON_LOCAL: ${{ github.event.inputs.train_on_local }} # If you want to train on your local runner, set this to True.
 
       ## Training environment
       CONDA_DEPENDENCIES_PATH: conda_dependencies.yml
@@ -142,7 +162,7 @@ jobs:
           python steps/02_AITraining.py
 
 
-  api-creation-and-CI:
+  api-creation:
     needs: [data-preparing, ai-training]
     # This will run Always BUT only when the previous two jobs were successful or skipped && the api_creation flag is set to true.
     if: ${{
@@ -158,10 +178,7 @@ jobs:
       DEPLOYMENT_ENV_NAME: animals-classification-env-deployment
       SCORE_SERVICE_NAME: animals-classification-svc
       LOCAL_MODEL_PATH: api/outputs
-      LOCAL_DEPLOYMENT: 'true'
-
-      DOCKER_TAG: latest
-      DOCKER_REPOSITORY: ghcr.io/nathansegers/05-azuremlops-api
+      LOCAL_DEPLOYMENT: ${{ github.event.inputs.kubernetes_deployment }}
 
     steps:
       - uses: actions/checkout@v2
@@ -172,7 +189,7 @@ jobs:
           python-version: 3.8
           cache: 'pip'
 
-      - name: "install requirements"
+      - name: 'install requirements'
         run: pip install -r requirements.txt
 
       - name: 'Run deployment script'
@@ -180,11 +197,52 @@ jobs:
         run: |
           python steps/03_Deployment.py
 
+  docker-build-and-push:
+    needs: [api-creation]
+    # This will run Always BUT only when the previous two jobs were successful or skipped && the api_creation flag is set to true.
+    if: ${{
+        always() &&
+        (needs.api-creation.result == 'success' || needs.api-creation.result == 'skipped') &&
+        github.event.inputs.kubernetes_deployment == 'true'
+      }}
+    runs-on: ubuntu-latest
 
-      - name: 'Docker creation'
+    steps:
+      - name: Gather Docker Meta Information
+        id: meta
         if: env.LOCAL_DEPLOYMENT == 'true'
-        run: |
-          echo "Creating Docker image"
+        uses: docker/metadata-action@v3
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            05-azuremlops-api
+            ghcr.io/nathansegers/05-azuremlops-api
+          # generate Docker tags based on the following events/attributes:
+          # The GitHub Branch
+          # The GitHub SHA
+          # More info: https://github.com/docker/build-push-action/blob/master/docs/advanced/tags-labels.md
+          tags: |
+            type=ref,event=branch
+            type=sha
+      
+      # Enter your GITHUB Token here!
+      - name: Login to GHCR
+        if: env.LOCAL_DEPLOYMENT == 'true'
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker Build and push
+        id: docker_build
+        if: env.LOCAL_DEPLOYMENT == 'true'
+        uses: docker/build-push-action@v2
+        with:
+          context: api
+          push: true
+          tags: user/app:latest
+
 
 
 
