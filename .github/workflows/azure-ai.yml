@@ -12,19 +12,19 @@ on:
     
 
 env:
-  # TENANT_ID: ${{ secrets.TENANT_ID }}
-  # CLIENT_ID: ${{ secrets.CLIENT_ID }}
-  # CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-  # data_prep: false
-  # ai_training: true
-  # api_creation: false
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
 
+  CLIENT_ID: c2f7b98e-f968-48a5-b0d9-f2e8d80edebd # Change this !
+  TENANT_ID: 4ded4bb1-6bff-42b3-aed7-6a36a503bf7a # Change this !
   WORKSPACE_NAME: segersnathan # Change this !
   RESOURCE_GROUP: NathanReserve # Change this !
   SUBSCRIPTION_ID: 7c50f9c3-289b-4ae0-a075-08784b3b9042 # Change this !
 
-  TEMP_STATE_DIRECTORY: tmp
+  ANIMALS: cats,dogs,pandas # As we have three classes, let's just defined them here. This way we can easily loop over them later.
+  TRAIN_SET_NAME: animals-training-set
+  TEST_SET_NAME: animals-testing-set
 
+  RANDOM_SEED: 42 # Random values that should be same for all the steps
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -34,9 +34,9 @@ jobs:
     runs-on: ubuntu-20.04
 
     outputs:
-      data_prep: 'false'
+      data_prep: 'true'
       ai_training: 'false'
-      api_creation: 'true'
+      api_creation: 'false'
 
     steps:
       - run: echo 'all outputs have been set'
@@ -49,37 +49,29 @@ jobs:
 
     env:
       DATA_FOLDER: data
-      DATASET_NEW_VERSION: true
-      DATASET_DESCRIPTION: Animals and their images
-      DATASET_BASE_NAME: animals
-      ANIMALS: cats, dogs, pandas
+      DATASET_VERSION: true
+      TRAIN_TEST_SPLIT_FACTOR: 0.20
+      PROCESS_IMAGES: true # Make the pipeline skip processing the images
+      SPLIT_IMAGES: true # Make the pipeline skip splitting the images
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # - name: 'Set up python'
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: 3.8
-      #     cache: 'pip'
+      - name: 'Set up python'
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+          cache: 'pip'
       
-      # - name: 'install requirements'
-      #   run: pip install -r requirements.txt
+      - name: 'install requirements'
+        run: pip install -r requirements.txt
           
-      # - name: 'Run data prep script'
-      #   id: dataprep
-      #   working-directory: AI-Pipeline
-      #   run: |
-      #     python 01_DataPreparing.py
-      
-      # - name: 'Save config data'
-      #   uses: actions/upload-artifact@v2.2.3
-      #   with:
-      #     name: config-data
-      #     path: {{ env.TEMP_STATE_DIRECTORY }}
-      #     retention-days: 10
+      - name: 'Run data prep script'
+        id: dataprep
+        run: |
+          python 01_DataPreparing.py
 
   ai-training:
     needs: [dependencies, data-preparing]
@@ -92,24 +84,43 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      BATCH_SIZE: 64
-      EPOCHS: 100
-      VALIDATION_SPLIT: 0.2
-      TRAIN_SCRIPT_NAME: train.py
-      ROOT_DIR: root
+      INITIAL_LEARNING_RATE: 0.01
+      MAX_EPOCHS: 50
+      BATCH_SIZE: 32
+      PATIENCE: 11
+      MODEL_NAME: animal-cnn
+      EXPERIMENT_NAME: animal-classification
+      SCRIPT_FOLDER: scripts
+
+      ## Compute cluster parts
+      AML_COMPUTE_CLUSTER_NAME: cpu-cluster
+      AML_COMPUTE_CLUSTER_MIN_NODES: 0
+      AML_COMPUTE_CLISTER_MAX_NODES: 4
+      AML_COMPUTE_CLUSTER_SKU: STANDARD_D2_V2
+
+      TRAIN_ON_LOCAL: False # If you want to train on your local runner, set this to True.
+
+      ## Training environment
+      CONDA_DEPENDENCIES_PATH: conda_dependencies.yml
+      TRAINING_ENV_NAME: animals-classification-env-training
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # - name: 'Set up python'
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: 3.8
-      #     cache: 'pip'
+      - name: 'Set up python'
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+          cache: 'pip'
 
-      # - name: "install requirements"
-      #   run: pip install -r requirements.txt
+      - name: "install requirements"
+        run: pip install -r requirements.txt
+
+      - name: 'Run data prep script'
+        id: aitraining
+        run: |
+          python 02_AITraining.py
 
 
   api-creation-and-CI:
@@ -124,21 +135,35 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      MODEL_DIRECTORY: api/models
-      MODEL_NAME: animals-cnn
-      MODEL_VERSION: latest # change to a specific version if you need to
+      DEPLOYMENT_DEPENDENCIES: deployment_environment.yml
+      DEPLOYMENT_ENV_NAME: animals-classification-env-deployment
+      SCORE_SERVICE_NAME: animals-classification-svc
+      LOCAL_MODEL_PATH: api/outputs
+      LOCAL_DEPLOYMENT: 'true'
 
       DOCKER_TAG: latest
-      DOCKER_REPOSITORY: ghcr.io/nathansegers/05-azuremlops
+      DOCKER_REPOSITORY: ghcr.io/nathansegers/05-azuremlops-api
 
     steps:
       - uses: actions/checkout@v2
+      
+      - name: 'Set up python'
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+          cache: 'pip'
 
-      - name: 'Download AI model'
+      - name: "install requirements"
+        run: pip install -r requirements.txt
+
+      - name: 'Run deployment script'
+        id: deployment
         run: |
-          echo "Downloading AI model to model directory"
+          python steps/03_Deployment.py
+
 
       - name: 'Docker creation'
+        if: env.LOCAL_DEPLOYMENT == 'true'
         run: |
           echo "Creating Docker image"
 
