@@ -63,6 +63,8 @@ env:
   TRAIN_SET_NAME: animals-training-set
   TEST_SET_NAME: animals-testing-set
 
+  SCRIPT_FOLDER: scripts
+
   RANDOM_SEED: 42 # Random values that should be same for all the steps
 
   GIT_SHA: ${{ github.sha }} # Set the SHA to use in the code
@@ -139,7 +141,6 @@ jobs:
       PATIENCE: 11
       MODEL_NAME: animal-cnn
       EXPERIMENT_NAME: animal-classification
-      SCRIPT_FOLDER: scripts
 
       ## Compute cluster parts
       AML_COMPUTE_CLUSTER_NAME: cpu-cluster
