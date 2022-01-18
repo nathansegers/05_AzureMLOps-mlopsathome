@@ -79,7 +79,7 @@ def prepareEnvironment(ws):
 
     # We can directly create an environment from a saved file
     env = Environment.from_conda_specification(environment_name, file_path=conda_dependencies_path)
-    env.python.user_managed_dependencies = not (os.environ.get('TRAIN_ON_LOCAL', 'false') == 'true') # True when training on local machine, otherwise False.
+    env.python.user_managed_dependencies = os.environ.get('TRAIN_ON_LOCAL', 'false') != 'true' # False when training on local machine, otherwise True.
     # Register environment to re-use later
     env.register(workspace = ws)
 

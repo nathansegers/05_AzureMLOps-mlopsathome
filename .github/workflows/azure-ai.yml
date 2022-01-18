@@ -103,9 +103,8 @@ jobs:
       DATA_FOLDER: data
       DATASET_VERSION: 'latest'
       TRAIN_TEST_SPLIT_FACTOR: 0.20
-      ## These variables should be set in a step, as they contain an expression
-      # PROCESS_IMAGES: ${{ github.event.inputs.data_prep_skip_process }} # Make the pipeline skip processing the images
-      # SPLIT_IMAGES: ${{ github.event.inputs.data_prep_skip_split }} # Make the pipeline skip splitting the images
+      PROCESS_IMAGES: ${{ github.event.inputs.data_prep_skip_process }} # Make the pipeline skip processing the images
+      SPLIT_IMAGES: ${{ github.event.inputs.data_prep_skip_split }} # Make the pipeline skip splitting the images
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -120,11 +119,6 @@ jobs:
       
       - name: 'install requirements'
         run: pip install -r requirements.txt
-
-      - name: Set env
-        run: |
-          echo "PROCESS_IMAGES='${{ github.event.inputs.data_prep_skip_process }}'" >> $GITHUB_ENV
-          echo "SPLIT_IMAGES='${{ github.event.inputs.data_prep_skip_split }}'" >> $GITHUB_ENV
           
       - name: 'Run data prep script'
         id: dataprep
@@ -154,6 +148,8 @@ jobs:
       AML_COMPUTE_CLISTER_MAX_NODES: 4
       AML_COMPUTE_CLUSTER_SKU: STANDARD_D2_V2
 
+      TRAIN_ON_LOCAL: ${{ github.event.inputs.train_on_local }} # If you want to train on your local runner, set this to True.
+
       ## Training environment
       CONDA_DEPENDENCIES_PATH: conda_dependencies.yml
       TRAINING_ENV_NAME: animals-classification-env-training
@@ -170,9 +166,6 @@ jobs:
 
       - name: "install requirements"
         run: pip install -r requirements.txt
-
-      - name: Set env
-        run: echo "TRAIN_ON_LOCAL='${{ github.event.inputs.train_on_local }}'" >> $GITHUB_ENV
 
       - name: 'Run data prep script'
         id: aitraining
