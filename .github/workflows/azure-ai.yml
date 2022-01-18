@@ -15,17 +15,17 @@ on:
       data_prep:
         description: 'Data preparing'
         type: boolean
-        required: true
+        required: false
         default: "true"
       ai_training:
         description: 'AI Training'
         type: boolean
-        required: true
+        required: false
         default: "true"
       api_creation:
         description: 'API Creation'
         type: boolean
-        required: true
+        required: false
         default: "true"
     
 
