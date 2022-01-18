@@ -11,6 +11,7 @@ on:
     branches: [ main, lessonsteps/** ]
 
   workflow_dispatch:
+    branches: [ main, lessonsteps/** ]
     inputs:
       data_prep:
         description: 'Data preparing'
