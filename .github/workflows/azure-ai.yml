@@ -203,9 +203,6 @@ jobs:
       - name: 'install requirements'
         run: pip install -r requirements.txt
 
-      - name: Set env
-        run: echo "LOCAL_DEPLOYMENT='${{ github.event.inputs.kubernetes_deployment }}'" >> $GITHUB_ENV
-
       - name: 'Run deployment script'
         id: deployment
         run: |
@@ -213,7 +210,7 @@ jobs:
 
   docker-build-and-push:
     needs: [api-creation]
-    # This will run Always BUT only when the previous two jobs were successful or skipped && the api_creation flag is set to true.
+    # This will run Always BUT only when the previous two jobs were successful or skipped && the kubernetes_deployment flag is set to true.
     if: ${{
         always() &&
         (needs.api-creation.result == 'success' || needs.api-creation.result == 'skipped') &&
@@ -224,7 +221,6 @@ jobs:
     steps:
       - name: Gather Docker Meta Information
         id: meta
-        if: env.LOCAL_DEPLOYMENT == 'true'
         uses: docker/metadata-action@v3
         with:
           # list of Docker images to use as base name for tags
@@ -241,7 +237,6 @@ jobs:
       
       # Enter your GITHUB Token here!
       - name: Login to GHCR
-        if: env.LOCAL_DEPLOYMENT == 'true'
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
@@ -250,12 +245,11 @@ jobs:
 
       - name: Docker Build and push
         id: docker_build
-        if: env.LOCAL_DEPLOYMENT == 'true'
         uses: docker/build-push-action@v2
         with:
           context: api
           push: true
-          tags: user/app:latest
+          tags: ${{ steps.meta.outputs.tags }}
 
 
 
