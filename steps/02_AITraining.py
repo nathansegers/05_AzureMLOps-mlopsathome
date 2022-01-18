@@ -79,7 +79,7 @@ def prepareEnvironment(ws):
 
     # We can directly create an environment from a saved file
     env = Environment.from_conda_specification(environment_name, file_path=conda_dependencies_path)
-    env.python.user_managed_dependencies = not (os.environ.get('TRAIN_ON_LOCAL', 'False') == 'True') # True when training on local machine, otherwise False.
+    env.python.user_managed_dependencies = not (os.environ.get('TRAIN_ON_LOCAL', 'false') == 'true') # True when training on local machine, otherwise False.
     # Register environment to re-use later
     env.register(workspace = ws)
 
@@ -135,7 +135,7 @@ def main():
 
     # We can also run on the local machine if we set the compute_target to None. We specify this in an ENV variable as TRAIN_ON_LOCAL.
     # If you don't give this parameter, we are defaulting to False, which means we will not train on local
-    compute_target = None if os.environ.get('TRAIN_ON_LOCAL', 'False') == 'True' else prepareComputeCluster(ws)
+    compute_target = None if os.environ.get('TRAIN_ON_LOCAL', 'false') == 'true' else prepareComputeCluster(ws)
     environment = prepareEnvironment(ws)
     exp, config = prepareTraining(ws, environment, compute_target)
 
