@@ -203,6 +203,9 @@ jobs:
       - name: 'install requirements'
         run: pip install -r requirements.txt
 
+      - name: Set env
+        run: echo "LOCAL_DEPLOYMENT=${{ github.event.inputs.kubernetes_deployment }}" >> $GITHUB_ENV
+
       - name: 'Run deployment script'
         id: deployment
         run: |
