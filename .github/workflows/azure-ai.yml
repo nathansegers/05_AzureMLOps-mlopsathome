@@ -208,6 +208,13 @@ jobs:
         run: |
           python steps/03_Deployment.py
 
+      - name: Upload API Code for Docker
+        if: github.event.inputs.kubernetes_deployment == 'true'
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-config
+          path: api
+
   docker-build-and-push:
     needs: [api-creation]
     # This will run Always BUT only when the previous two jobs were successful or skipped && the kubernetes_deployment flag is set to true.
@@ -219,7 +226,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Download math result for job 1
+        uses: actions/download-artifact@v2
+        with:
+          name: docker-config
 
       - name: Gather Docker Meta Information
         id: meta
