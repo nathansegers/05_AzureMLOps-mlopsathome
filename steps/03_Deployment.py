@@ -14,6 +14,9 @@ load_dotenv()
 
 ANIMALS = os.environ.get('ANIMALS').split(',')
 MODEL_NAME = os.environ.get('MODEL_NAME')
+LOCAL_DEPLOYMENT = os.environ.get('LOCAL_DEPLOYMENT')
+print(LOCAL_DEPLOYMENT)
+print(type(LOCAL_DEPLOYMENT))
 
 def prepareEnv(ws):
     environment_name = os.environ.get('DEPLOYMENT_ENV_NAME')
@@ -53,10 +56,12 @@ def downloadLatestModel(ws):
 def main():
     ws = connectWithAzure()
 
-    if os.environ.get('LOCAL_DEPLOYMENT') == "True":
+    if os.environ.get('LOCAL_DEPLOYMENT') == "true":
+        print('Deploying locally.')
         model = downloadLatestModel(ws)
         print(f'Downloaded the model {model.id} locally. You can now proceed to build the Docker image.')
     else:
+        print('Deploying on Azure.')
         environment = prepareEnv(ws)
         service = prepareDeployment(ws, environment)
         service.wait_for_deployment(show_output=True)

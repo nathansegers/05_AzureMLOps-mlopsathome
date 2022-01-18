@@ -26,7 +26,7 @@ TRAIN_TEST_SPLIT_FACTOR = float(os.environ.get('TRAIN_TEST_SPLIT_FACTOR'))
 
 def processAndUploadAnimalImages(datasets, data_path, processed_path, ws, animal_name):
 
-    # We can't use mount on these machines, so we'll have to download thme
+    # We can't use mount on these machines, so we'll have to download them
 
     animal_path = os.path.join(data_path, 'animals', animal_name)
 
@@ -103,7 +103,7 @@ def trainTestSplitData(ws):
         # Get only the .JPG images
         animal_images = [img for img in animal_dataset.to_path() if img.split('.')[-1] == 'jpg']
 
-        print(f'... there are about a {len(animal_images)} images to process.')
+        print(f'... there are about {len(animal_images)} images to process.')
 
         ## Concatenate the names for the animal_name and the img_path. Don't put a / between, because the img_path already contains that
         animal_images = [(default_datastore, f'processed_animals/{animal_name}{img_path}') for img_path in animal_images] # Make sure the paths are actual DataPaths
@@ -146,13 +146,13 @@ def main():
     ws = connectWithAzure()
 
     # Set these values to 'false' if you want to skip them.
-    if os.environ.get('PROCESS_IMAGES') == 'True':
+    if os.environ.get('PROCESS_IMAGES') == 'true':
         print('Processing the images')
         prepareDataset(ws)
     else:
         print('Skipping the process part')
     
-    if os.environ.get('SPLIT_IMAGES') == 'True':
+    if os.environ.get('SPLIT_IMAGES') == 'true':
         print('Splitting the images')
         trainTestSplitData(ws)
     else:
