@@ -62,6 +62,7 @@ env:
   ANIMALS: cats,dogs,pandas # As we have three classes, let's just defined them here. This way we can easily loop over them later.
   TRAIN_SET_NAME: animals-training-set
   TEST_SET_NAME: animals-testing-set
+  MODEL_NAME: animal-cnn
 
   SCRIPT_FOLDER: scripts
 
@@ -139,7 +140,6 @@ jobs:
       MAX_EPOCHS: 50
       BATCH_SIZE: 32
       PATIENCE: 11
-      MODEL_NAME: animal-cnn
       EXPERIMENT_NAME: animal-classification
 
       ## Compute cluster parts
