@@ -1,0 +1,11 @@
+name: azureml-deployment
+channels:
+  - anaconda
+  - conda-forge
+dependencies:
+  - python=3.8
+  - pip:
+      - azureml-defaults
+      - tensorflow
+      - numpy
+      - Pillow

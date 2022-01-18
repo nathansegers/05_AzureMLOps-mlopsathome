@@ -16,7 +16,7 @@ from azureml.data.datapath import DataPath
 
 
 
-# When you deploy locally, you can use a .env file to store all your environment variables.
+# When you work locally, you can use a .env file to store all your environment variables.
 # This line read those in.
 load_dotenv()
 

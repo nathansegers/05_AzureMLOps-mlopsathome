@@ -2,9 +2,10 @@ tmp/**
 
 .env
 .config
-.devcontainer
+# .devcontainer
 data
 
 Notes.txt
 
 **/__pycache__
+api/outputs/**
