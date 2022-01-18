@@ -9,6 +9,21 @@ on:
     branches: [ main, lessonsteps/** ]
   pull_request:
     branches: [ main, lessonsteps/** ]
+
+  workflow_dispatch:
+    inputs:
+      data_prep:
+        description: 'Data preparing'
+        required: true
+        default: "true"
+      ai_training:
+        description: 'AI Training'
+        required: true
+        default: "true"
+      api_creation:
+        description: 'API Creation'
+        required: true
+        default: "true"
     
 
 env:
@@ -29,21 +44,21 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
-  # This job is just to set redirect some environment values as output values.
-  dependencies:
-    runs-on: ubuntu-20.04
+  # # This job is just to set redirect some environment values as output values.
+  # dependencies:
+  #   runs-on: ubuntu-20.04
 
-    outputs:
-      data_prep: 'true'
-      ai_training: 'false'
-      api_creation: 'false'
+  #   outputs:
+  #     data_prep: github.event.inputs.vmSku
+  #     ai_training: 'false'
+  #     api_creation: 'false'
 
-    steps:
-      - run: echo 'all outputs have been set'
+  #   steps:
+  #     - run: echo 'all outputs have been set'
 
   data-preparing:
-    needs: [dependencies] # Wait until this job was finished.
-    if: ${{ needs.dependencies.outputs.data_prep == 'true' }}
+    # needs: [dependencies] # Wait until this job was finished.
+    if: ${{ github.event.inputs.data_prep == 'true' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
@@ -74,12 +89,12 @@ jobs:
           python 01_DataPreparing.py
 
   ai-training:
-    needs: [dependencies, data-preparing]
+    needs: [data-preparing]
     # This will run Always BUT only when the previous job was successful or skipped && the ai_Training flag is set to true.
     if: ${{
         always() &&
         (needs.data-preparing.result == 'success' || needs.data-preparing.result == 'skipped') &&
-        needs.dependencies.outputs.ai_training == 'true'
+        github.event.inputs.ai_training == 'true'
       }}
     runs-on: ubuntu-latest
 
@@ -124,13 +139,13 @@ jobs:
 
 
   api-creation-and-CI:
-    needs: [dependencies, data-preparing, ai-training]
+    needs: [data-preparing, ai-training]
     # This will run Always BUT only when the previous two jobs were successful or skipped && the api_creation flag is set to true.
     if: ${{
         always() &&
         (needs.data-preparing.result == 'success' || needs.data-preparing.result == 'skipped') &&
         (needs.ai-training.result == 'success' || needs.ai-training.result == 'skipped') &&
-        needs.dependencies.outputs.api_creation == 'true'
+        github.event.inputs.api_creation == 'true'
       }}
     runs-on: ubuntu-latest
 
