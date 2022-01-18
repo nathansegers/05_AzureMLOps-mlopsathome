@@ -65,6 +65,8 @@ env:
 
   RANDOM_SEED: 42 # Random values that should be same for all the steps
 
+  GIT_SHA: ${{ github.sha }} # Set the SHA to use in the code
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 

@@ -103,7 +103,7 @@ def trainTestSplitData(ws):
         # Get only the .JPG images
         animal_images = [img for img in animal_dataset.to_path() if img.split('.')[-1] == 'jpg']
 
-        print(f'... there are about a {len(animal_images)} images to process.')
+        print(f'... there are about {len(animal_images)} images to process.')
 
         ## Concatenate the names for the animal_name and the img_path. Don't put a / between, because the img_path already contains that
         animal_images = [(default_datastore, f'processed_animals/{animal_name}{img_path}') for img_path in animal_images] # Make sure the paths are actual DataPaths

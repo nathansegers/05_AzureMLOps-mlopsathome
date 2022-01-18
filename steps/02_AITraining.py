@@ -143,7 +143,7 @@ def main():
     run.wait_for_completion(show_output=False) # We aren't going to show the training output, you can follow that on the Azure logs if you want to.
     print(f"Run {run.id} has finished.")
 
-    downloadAndRegisterModel(ws, run, MODEL_NAME)
+    downloadAndRegisterModel(ws, run)
 
 if __name__ == '__main__':
     main()
