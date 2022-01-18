@@ -237,7 +237,6 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            05-azuremlops-api
             ghcr.io/nathansegers/05-azuremlops-api
           # generate Docker tags based on the following events/attributes:
           # The GitHub Branch
