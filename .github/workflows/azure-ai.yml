@@ -68,19 +68,27 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
+  ## Note: This is an obsolete job that is not used in the assignment. You can use this to define 'inputs' in an automated pipeline
+
   # # This job is just to set redirect some environment values as output values.
+  
   # dependencies:
   #   runs-on: ubuntu-20.04
 
+  ## Note: These are equivalent to the inputs of the Workflow_dispatch
+  ## You can refer to these variables like this: ${{ needs.dependencies.outputs.data_prep }} similar to the ${{ github.event.inputs.data_prep }}
   #   outputs:
-  #     data_prep: github.event.inputs.vmSku
+  #     data_prep: 'true'
   #     ai_training: 'false'
   #     api_creation: 'false'
+  ## Add more variables if you want
 
+  ## Note: There should be at least one step in a pipeline job.
   #   steps:
   #     - run: echo 'all outputs have been set'
 
   data-preparing:
+    ## Note: Uncomment this if you are activating the previous job called 'dependencies'.
     # needs: [dependencies] # Wait until this job was finished.
     if: ${{ github.event.inputs.data_prep == 'true' }}
     # The type of runner that the job will run on
@@ -88,7 +96,7 @@ jobs:
 
     env:
       DATA_FOLDER: data
-      DATASET_VERSION: true
+      DATASET_VERSION: 'latest'
       TRAIN_TEST_SPLIT_FACTOR: 0.20
       PROCESS_IMAGES: ${{ github.event.inputs.data_prep_skip_process }} # Make the pipeline skip processing the images
       SPLIT_IMAGES: ${{ github.event.inputs.data_prep_skip_split }} # Make the pipeline skip splitting the images
