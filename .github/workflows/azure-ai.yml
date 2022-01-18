@@ -4,7 +4,7 @@ name: MLOps Azure Data Preparing and AI Training
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
+  # Triggers the workflow on push or pull request events
   push:
     branches: [ main, lessonsteps/** ]
   pull_request:
@@ -220,7 +220,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Gather Docker Meta Information
         id: meta
         uses: docker/metadata-action@v3
