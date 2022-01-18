@@ -14,6 +14,9 @@ load_dotenv()
 
 ANIMALS = os.environ.get('ANIMALS').split(',')
 MODEL_NAME = os.environ.get('MODEL_NAME')
+LOCAL_DEPLOYMENT = os.environ.get('LOCAL_DEPLOYMENT')
+print(LOCAL_DEPLOYMENT)
+print(type(LOCAL_DEPLOYMENT))
 
 def prepareEnv(ws):
     environment_name = os.environ.get('DEPLOYMENT_ENV_NAME')
